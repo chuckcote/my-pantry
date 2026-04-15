@@ -34,7 +34,7 @@ const pantryText = (items) =>
   items.map(it => `- ${it.name}: ${it.qty} ${it.unit} [${it.category}]${it.expiry ? ` expires ${it.expiry}` : ''}`).join('\n');
 
 // ── image resizer — shrinks photos before sending to Claude ──────────────────
-async function resizeImage(dataUrl, maxDim = 1568, quality = 0.85) {
+async function resizeImage(dataUrl, maxDim = 800, quality = 0.7) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -179,7 +179,7 @@ function App() {
         const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
         setQfParsed(parsed.map(p => ({ id:uid(), name:p.name, qty:String(p.qty??1), unit:p.unit||'pcs', category:p.category||qfCategory, expiry:'', notes:'' })));
         setQfStep('review');
-      } catch { setQfError("Couldn't read photo — try the text method."); }
+      } catch (err) { console.error('Photo scan error:', err); setQfError(`Scan failed: ${err.message || err}`); }
       setQfLoading(false);
     };
     reader.readAsDataURL(file);
