@@ -33,6 +33,23 @@ const expiryInfo = (dateStr) => {
 const pantryText = (items) =>
   items.map(it => `- ${it.name}: ${it.qty} ${it.unit} [${it.category}]${it.expiry ? ` expires ${it.expiry}` : ''}`).join('\n');
 
+// ── image resizer — shrinks photos before sending to Claude ──────────────────
+async function resizeImage(dataUrl, maxDim = 1568, quality = 0.85) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 // ── AI proxy — calls our own /api/chat, no key in browser ────────────────────
 async function callClaude(body) {
   const res = await fetch('/api/chat', {
@@ -156,7 +173,8 @@ function App() {
       setQfStep('photo');
       setQfLoading(true); setQfError('');
       try {
-        const raw = await claudeVision(PARSE_SYSTEM, dataUrl.split(',')[1], file.type||'image/jpeg',
+        const resized = await resizeImage(dataUrl);
+        const raw = await claudeVision(PARSE_SYSTEM, resized.split(',')[1], 'image/jpeg',
           `Photo of my ${qfCategory}. List all visible food items as JSON.`);
         const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
         setQfParsed(parsed.map(p => ({ id:uid(), name:p.name, qty:String(p.qty??1), unit:p.unit||'pcs', category:p.category||qfCategory, expiry:'', notes:'' })));
@@ -497,7 +515,7 @@ function App() {
 
 const S = {
   root:         { minHeight:'100vh', background:'#f7f5f0', fontFamily:"'Nunito',sans-serif", color:'#222' },
-  header:       { background:'#1a1a2e', color:'#fff', padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, zIndex:50, flexWrap:'wrap', gap:8 },
+  header:       { background:'#1a1a2e', color:'#fff', padding:'12px 16px', paddingTop:'calc(12px + env(safe-area-inset-top))', display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, zIndex:50, flexWrap:'wrap', gap:8 },
   brand:        { display:'flex', alignItems:'center', gap:10 },
   brandName:    { fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, lineHeight:1 },
   brandSub:     { fontSize:11, color:'#aaa', marginTop:2 },
