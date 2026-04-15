@@ -57,8 +57,8 @@ async function callClaude(body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
   const d = await res.json();
+  if (!res.ok) throw new Error(`API ${res.status}: ${d.error?.message || JSON.stringify(d)}`);
   return d.content?.map(b => b.text || '').join('') || '';
 }
 
