@@ -51,7 +51,7 @@ async function resizeImage(dataUrl, maxDim = 800, quality = 0.7) {
 }
 
 // ── AI proxy — calls our own /api/chat, no key in browser ────────────────────
-async function callClaude(body) {
+async function callGemini(body) {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -59,20 +59,25 @@ async function callClaude(body) {
   });
   const d = await res.json();
   if (!res.ok) throw new Error(`API ${res.status}: ${d.error?.message || JSON.stringify(d)}`);
-  return d.content?.map(b => b.text || '').join('') || '';
+  return d.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
 }
 
 async function claudeText(system, userContent) {
-  return callClaude({ model:'claude-sonnet-4-20250514', max_tokens:2000, system, messages:[{ role:'user', content:userContent }] });
+  return callGemini({
+    system_instruction: { parts: [{ text: system }] },
+    contents: [{ parts: [{ text: userContent }] }],
+    generationConfig: { maxOutputTokens: 2000 },
+  });
 }
 
 async function claudeVision(system, base64, mediaType, prompt) {
-  return callClaude({
-    model:'claude-sonnet-4-20250514', max_tokens:2000, system,
-    messages:[{ role:'user', content:[
-      { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 } },
-      { type:'text', text:prompt },
+  return callGemini({
+    system_instruction: { parts: [{ text: system }] },
+    contents: [{ parts: [
+      { inline_data: { mime_type: mediaType, data: base64 } },
+      { text: prompt },
     ]}],
+    generationConfig: { maxOutputTokens: 2000 },
   });
 }
 
