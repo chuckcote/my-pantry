@@ -14,8 +14,8 @@ export default function RecipesView({ items, onCook }) {
     setLoading(true); setRecipes(null); setError(''); setSelectedRecipe(null);
     try {
       const raw = await claudeText(
-        'You are a home chef. Return EXACTLY 3 recipes as a JSON array. Each: { "title", "time", "description"(1 sentence), "steps"(4-6 strings), "uses":[{"name","amount","unit"}] }. ONLY valid JSON, no markdown.',
-        `My pantry:\n${pantryText(items)}\nSuggest 3 recipes.`
+        'You are a home chef. Return EXACTLY 3 recipes as a JSON array. Each: { "title", "time", "description"(1 sentence), "steps"(4-6 strings), "uses":[{"name","amount","unit"}] }. The "uses" array must list ALL ingredients the recipe needs — including ones not in the pantry. ONLY valid JSON, no markdown.',
+        `My pantry:\n${pantryText(items)}\nSuggest 3 recipes I can mostly make from these ingredients.`
       );
       setRecipes(JSON.parse(raw.replace(/```json|```/g, '').trim()));
     } catch (err) {
@@ -71,10 +71,10 @@ export default function RecipesView({ items, onCook }) {
             {selectedRecipe.uses?.map((u, i) => {
               const have = items.find(it => it.name.toLowerCase() === u.name.toLowerCase());
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 15, borderBottom: '1px solid #f5f5f5', opacity: have ? 1 : 0.5 }}>
-                  <span>{have ? '✅' : '❌'}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 15, borderBottom: '1px solid #f5f5f5' }}>
+                  <span>{have ? '✅' : '🛒'}</span>
                   <span style={{ fontWeight: 600 }}>{u.amount} {u.unit} {u.name}</span>
-                  {!have && <span style={{ color: '#c0392b', fontSize: 12 }}>(not in pantry)</span>}
+                  {!have && <span style={{ background: '#fff3e0', color: '#e65100', fontSize: 11, fontWeight: 700, borderRadius: 6, padding: '2px 7px' }}>need to buy</span>}
                 </div>
               );
             })}
