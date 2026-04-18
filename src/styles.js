@@ -66,4 +66,6 @@ export const CSS = `
   .method-card:hover { border-color: #1a1a2e !important; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); transition: all 0.15s; }
   input:focus, select:focus, textarea:focus { outline: 2px solid #1a1a2e; outline-offset: -1px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.4); } 50% { box-shadow: 0 0 0 18px rgba(192,57,43,0); } }
+  .mic-recording { animation: mic-pulse 1.4s ease-in-out infinite; }
 `;

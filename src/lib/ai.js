@@ -28,6 +28,17 @@ export async function claudeText(system, userContent) {
   });
 }
 
+export async function transcribeAudio(base64, mimeType) {
+  const res = await fetch('/api/transcribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ audio: base64, mimeType }),
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error(`API ${res.status}: ${d.error?.message || JSON.stringify(d)}`);
+  return d.text;
+}
+
 export async function claudeVision(system, base64, mediaType, prompt) {
   return callGroq({
     model: VISION_MODEL,
