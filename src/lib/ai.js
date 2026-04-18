@@ -4,7 +4,8 @@ const VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 export const PARSE_SYSTEM = `You are a pantry inventory parser.
 Return ONLY a valid JSON array. No markdown, no explanation.
 Each item: { "name": string, "qty": number, "unit": string, "category": "Fridge"|"Freezer"|"Pantry" }
-Default qty=1 if unknown. Use sensible units (eggs→pcs, milk→L, flour→kg). Short clear names. Detect as many items as possible.`;
+Default qty=1 if unknown. Use sensible units (eggs→pcs, milk→L, flour→kg). Detect as many items as possible.
+Always use clean, official food names — expand abbreviations and colloquialisms (e.g. "OJ" → "Orange Juice", "coke" → "Cola", "chick" → "Chicken", "pb" → "Peanut Butter", "mozza" → "Mozzarella"). Capitalize properly.`;
 
 async function callGroq(body) {
   const res = await fetch('/api/chat', {

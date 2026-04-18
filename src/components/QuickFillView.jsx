@@ -54,11 +54,11 @@ export default function QuickFillView({ onConfirm, onNavigate }) {
             reader.readAsDataURL(blob);
           });
           const transcript = await transcribeAudio(base64, mimeType);
-          // Feed transcript into the text parser flow
           const raw = await claudeText(PARSE_SYSTEM, `Category hint: "${category}". Parse:\n${transcript}`);
           const data = JSON.parse(raw.replace(/```json|```/g, '').trim());
-          setParsed(data.map(p => ({ id: uid(), name: p.name, qty: String(p.qty ?? 1), unit: p.unit || 'pcs', category: p.category || category, expiry: '', notes: '' })));
-          setStep('review');
+          const toAdd = data.map(p => ({ id: uid(), name: p.name, qty: String(p.qty ?? 1), unit: p.unit || 'pcs', category: p.category || category, expiry: '', notes: '' }));
+          await onConfirm(toAdd);
+          setStep('done');
         } catch (err) { setError(`Failed: ${err.message}`); setStep('record'); }
         setLoading(false);
       };
