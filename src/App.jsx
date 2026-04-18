@@ -10,11 +10,13 @@ import RecipesView from './components/RecipesView.jsx';
 import ItemFormModal from './components/ItemFormModal.jsx';
 
 export default function App() {
-  const [items,   setItems]   = useState([]);
-  const [ready,   setReady]   = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [view,    setView]    = useState('home');
-  const [form,    setForm]    = useState(null);
+  const [items,      setItems]      = useState([]);
+  const [ready,      setReady]      = useState(false);
+  const [syncing,    setSyncing]    = useState(false);
+  const [view,       setView]       = useState('home');
+  const [form,       setForm]       = useState(null);
+  const [normalizing, setNormalizing] = useState(false);
+  const [normalizeMsg, setNormalizeMsg] = useState('');
 
   // Initial load + splash removal
   useEffect(() => {
@@ -74,6 +76,17 @@ export default function App() {
     setView('home');
   };
 
+  const normalizePantry = async () => {
+    setNormalizing(true); setNormalizeMsg('');
+    try {
+      const res = await fetch('/api/normalize', { method: 'POST' });
+      const d   = await res.json();
+      setNormalizeMsg(d.updated > 0 ? `✨ Tidied ${d.updated} item${d.updated === 1 ? '' : 's'}` : '✓ Everything looks good');
+    } catch { setNormalizeMsg('Failed — try again'); }
+    setNormalizing(false);
+    setTimeout(() => setNormalizeMsg(''), 4000);
+  };
+
   const alerts = items.filter(it => { const d = daysUntil(it.expiry); return d !== null && d <= 3; });
 
   if (!ready) return null;
@@ -83,7 +96,7 @@ export default function App() {
       <style>{CSS}</style>
       <Header items={items} syncing={syncing} alerts={alerts} view={view} onNavigate={setView} />
       {view === 'home' && <ExpiryBanner alerts={alerts} />}
-      {view === 'home'      && <PantryView items={items} onNavigate={setView} setForm={setForm} onDelete={deleteItem} onNudgeQty={nudgeQty} />}
+      {view === 'home'      && <PantryView items={items} onNavigate={setView} setForm={setForm} onDelete={deleteItem} onNudgeQty={nudgeQty} onNormalize={normalizePantry} normalizing={normalizing} normalizeMsg={normalizeMsg} />}
       {view === 'quickfill' && <QuickFillView onConfirm={addItems} onNavigate={setView} />}
       {view === 'ai'        && <RecipesView items={items} onCook={cookRecipe} />}
       <ItemFormModal form={form} setForm={setForm} onSave={saveForm} />

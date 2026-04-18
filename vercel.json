@@ -6,8 +6,11 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/chat.js": {
-      "maxDuration": 30
-    }
-  }
+    "api/chat.js":      { "maxDuration": 30 },
+    "api/transcribe.js":{ "maxDuration": 30 },
+    "api/normalize.js": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/normalize", "schedule": "0 3 * * *" }
+  ]
 }

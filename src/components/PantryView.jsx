@@ -2,7 +2,7 @@ import { S } from '../styles.js';
 import { CATEGORIES, CAT_ICONS, CAT_COLORS } from '../config.js';
 import { expiryInfo, blank } from '../lib/utils.js';
 
-export default function PantryView({ items, onNavigate, setForm, onDelete, onNudgeQty }) {
+export default function PantryView({ items, onNavigate, setForm, onDelete, onNudgeQty, onNormalize, normalizing, normalizeMsg }) {
   return (
     <main style={S.main}>
       {items.length === 0 && (
@@ -51,6 +51,15 @@ export default function PantryView({ items, onNavigate, setForm, onDelete, onNud
           </section>
         );
       })}
+
+      {items.length > 0 && (
+        <div style={{ textAlign: 'center', paddingBottom: 8 }}>
+          <button onClick={onNormalize} disabled={normalizing} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 12, cursor: normalizing ? 'not-allowed' : 'pointer', padding: '6px 12px' }}>
+            {normalizing ? '✨ Tidying up names…' : '✨ Tidy up names'}
+          </button>
+          {normalizeMsg && <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>{normalizeMsg}</div>}
+        </div>
+      )}
     </main>
   );
 }
