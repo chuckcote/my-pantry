@@ -1,5 +1,5 @@
 const TEXT_MODEL   = 'llama-3.3-70b-versatile';
-const VISION_MODEL = 'llama-3.2-11b-vision-preview';
+const VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 
 export const PARSE_SYSTEM = `You are a pantry inventory parser.
 Return ONLY a valid JSON array. No markdown, no explanation.
