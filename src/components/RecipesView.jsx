@@ -7,17 +7,21 @@ import { pantryText } from '../lib/utils.js';
 export default function RecipesView({ items, onCook }) {
   const [loading, setLoading]               = useState(false);
   const [recipes, setRecipes]               = useState(null);
+  const [error, setError]                   = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   const getRecipes = async () => {
-    setLoading(true); setRecipes(null); setSelectedRecipe(null);
+    setLoading(true); setRecipes(null); setError(''); setSelectedRecipe(null);
     try {
       const raw = await claudeText(
         'You are a home chef. Return EXACTLY 3 recipes as a JSON array. Each: { "title", "time", "description"(1 sentence), "steps"(4-6 strings), "uses":[{"name","amount","unit"}] }. ONLY valid JSON, no markdown.',
         `My pantry:\n${pantryText(items)}\nSuggest 3 recipes.`
       );
       setRecipes(JSON.parse(raw.replace(/```json|```/g, '').trim()));
-    } catch { setRecipes([]); }
+    } catch (err) {
+      console.error('Recipe error:', err);
+      setError(err.message || 'Something went wrong. Try again.');
+    }
     setLoading(false);
   };
 
@@ -32,6 +36,7 @@ export default function RecipesView({ items, onCook }) {
               {loading ? 'Finding recipes…' : '✨ Suggest Recipes'}
             </button>
             {items.length === 0 && <p style={{ color: '#aaa', fontSize: 13, marginTop: 12 }}>Add items first.</p>}
+            {error && <div style={S.errorMsg}>{error}</div>}
           </div>
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center', padding: 24 }}>
